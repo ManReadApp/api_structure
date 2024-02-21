@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod error;
 pub mod search;
+pub mod scrape;
 
 use crate::error::{ApiErr, ApiErrorType};
 use std::collections::HashMap;
