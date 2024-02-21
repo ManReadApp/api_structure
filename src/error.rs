@@ -40,6 +40,14 @@ pub enum ApiErrorType {
     Unauthorized,
     ReadError,
     WriteError,
+    ScrapeErrorInvalidUrl,
+    ScrapeErrorJsSandboxError,
+    ScrapeErrorBase64Error,
+    ScrapeErrorKeyDecryptionError,
+    ScrapeErrorInputError,
+    ScrapeErrorFetchError,
+    ScrapeErrorParseError,
+    ScrapeErrorReadError
 }
 
 impl Display for ApiErrorType {
@@ -51,6 +59,14 @@ impl Display for ApiErrorType {
             ApiErrorType::Unauthorized => write!(f, "Unauthorized"),
             ApiErrorType::ReadError => write!(f, "ReadError"),
             ApiErrorType::WriteError => write!(f, "WriteError"),
+            ApiErrorType::ScrapeErrorInvalidUrl => write!(f, "ScrapeErrorInvalidUrl"),
+            ApiErrorType::ScrapeErrorJsSandboxError => write!(f, "ScrapeErrorJsSandboxError"),
+            ApiErrorType::ScrapeErrorBase64Error => write!(f, "ScrapeErrorBase64Error"),
+            ApiErrorType::ScrapeErrorKeyDecryptionError => write!(f, "ScrapeErrorKeyDecryptionError"),
+            ApiErrorType::ScrapeErrorInputError => write!(f, "ScrapeErrorInputError"),
+            ApiErrorType::ScrapeErrorFetchError => write!(f, "ScrapeErrorFetchError"),
+            ApiErrorType::ScrapeErrorParseError => write!(f, "ScrapeErrorParseError"),
+            ApiErrorType::ScrapeErrorReadError => write!(f, "ScrapeErrorReadError"),
         }
     }
 }
