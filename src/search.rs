@@ -1,5 +1,30 @@
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct SearchResponse {
+    pub manga_id: String,
+    pub titles: HashMap<String, Vec<String>>,
+    pub tags: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct SearchRequest {
+    pub order: Order,
+    pub desc: bool,
+    pub page: u32,
+    pub query: ItemOrArray,
+}
+
+#[derive(Deserialize, Serialize, Debug, Copy, Clone)]
+pub enum Order {
+    Id,
+    Alphabetical,
+    Updated,
+    LastRead,
+    Popularity,
+}
 
 /// can contain item or array
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,6 +53,15 @@ pub struct Item {
 pub struct ItemData {
     pub name: String,
     pub value: ItemValue,
+}
+
+impl ItemData {
+    pub fn enum_(name: impl ToString) -> Self {
+        Self {
+            name: name.to_string(),
+            value: ItemValue::None
+        }
+    }
 }
 
 /// define the type it should be parsed to
@@ -70,6 +104,7 @@ impl ItemKind {
 /// enum with different values
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ItemValue {
+    None,
     Bool(bool),
     Int(i64),
     Float(f64),
