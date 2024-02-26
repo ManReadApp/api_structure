@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use crate::RequestImpl;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct SearchResponse {
@@ -13,8 +14,14 @@ pub struct SearchResponse {
 pub struct SearchRequest {
     pub order: Order,
     pub desc: bool,
+    pub limit: u32,
     pub page: u32,
     pub query: ItemOrArray,
+}
+
+impl RequestImpl for SearchRequest {
+    const ROUTE: &'static str = "search";
+    const AUTH: bool = true;
 }
 
 #[derive(Deserialize, Serialize, Debug, Copy, Clone)]
