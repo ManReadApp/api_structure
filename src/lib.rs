@@ -4,6 +4,7 @@ pub mod search;
 pub mod scrape;
 pub mod home;
 pub mod image;
+pub mod info;
 
 use crate::error::{ApiErr, ApiErrorType};
 use std::collections::HashMap;
