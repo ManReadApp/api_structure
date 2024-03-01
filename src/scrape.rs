@@ -1,9 +1,9 @@
 use serde::Serialize;
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Debug)]
 pub struct ScrapeAccount {
     pub username: String,
-    pub password: String
+    pub password: String,
 }
 
 impl ScrapeAccount {

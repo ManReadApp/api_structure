@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 use crate::error::ApiErr;
-use crate::RequestImpl;
 use crate::ApiErrorType;
+use crate::RequestImpl;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::str::FromStr;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct SearchResponse {
@@ -12,7 +12,7 @@ pub struct SearchResponse {
     pub tags: Vec<String>,
     pub status: Status,
     pub ext: String,
-    pub number: u32
+    pub number: u32,
 }
 #[derive(Deserialize, Serialize, Debug, Clone, Copy)]
 pub enum Status {
@@ -20,7 +20,7 @@ pub enum Status {
     Hiatus,
     Ongoing,
     Completed,
-    Upcoming
+    Upcoming,
 }
 
 impl TryFrom<u64> for Status {
@@ -37,7 +37,7 @@ impl TryFrom<u64> for Status {
                 message: Some("Couldnt find manga status".to_string()),
                 cause: None,
                 err_type: ApiErrorType::InternalError,
-            })
+            }),
         }
     }
 }
@@ -110,7 +110,7 @@ impl ItemData {
     pub fn enum_(name: impl ToString) -> Self {
         Self {
             name: name.to_string(),
-            value: ItemValue::None
+            value: ItemValue::None,
         }
     }
 }

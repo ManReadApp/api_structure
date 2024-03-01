@@ -47,7 +47,7 @@ pub enum ApiErrorType {
     ScrapeErrorInputError,
     ScrapeErrorFetchError,
     ScrapeErrorParseError,
-    ScrapeErrorReadError
+    ScrapeErrorReadError,
 }
 
 impl Display for ApiErrorType {
@@ -62,7 +62,9 @@ impl Display for ApiErrorType {
             ApiErrorType::ScrapeErrorInvalidUrl => write!(f, "ScrapeErrorInvalidUrl"),
             ApiErrorType::ScrapeErrorJsSandboxError => write!(f, "ScrapeErrorJsSandboxError"),
             ApiErrorType::ScrapeErrorBase64Error => write!(f, "ScrapeErrorBase64Error"),
-            ApiErrorType::ScrapeErrorKeyDecryptionError => write!(f, "ScrapeErrorKeyDecryptionError"),
+            ApiErrorType::ScrapeErrorKeyDecryptionError => {
+                write!(f, "ScrapeErrorKeyDecryptionError")
+            }
             ApiErrorType::ScrapeErrorInputError => write!(f, "ScrapeErrorInputError"),
             ApiErrorType::ScrapeErrorFetchError => write!(f, "ScrapeErrorFetchError"),
             ApiErrorType::ScrapeErrorParseError => write!(f, "ScrapeErrorParseError"),

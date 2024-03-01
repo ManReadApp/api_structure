@@ -1,22 +1,25 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
+use crate::error::ApiErr;
 use crate::search::Status;
+use crate::ApiErrorType;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct MangaInfoRequest {
-    pub manga_id: String
+    pub manga_id: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct MangaInfoResponse {
     pub manga_id: String,
     pub titles: HashMap<String, Vec<String>>,
-    kind: String,
+    pub kind: String,
     pub description: Option<String>,
     pub tags: Vec<Tag>,
     pub status: Status,
     pub visibility: Visibility,
     pub uploader: String,
+    pub my: bool,
     pub artists: Vec<String>,
     pub authors: Vec<String>,
     pub cover: u32,
@@ -27,13 +30,13 @@ pub struct MangaInfoResponse {
     pub scraper: bool,
     pub favorite: bool,
     /// manga_id
-    pub progress: Option<String>
+    pub progress: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ExternalSite {
-    url: String,
-    icon_uri: String
+    pub url: String,
+    pub icon_uri: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -47,12 +50,34 @@ pub struct Chapter {
 
 #[derive(Serialize, Deserialize)]
 pub struct Tag {
-    tag: String,
+    pub tag: String,
     pub description: Option<String>,
     pub sex: u64,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Visibility {
+pub enum Visibility {
+    /// Everyone
+    Visible,
+    /// Admins,Coadmins, Mods, and Author
+    Hidden,
+    /// Admins,Coadmins, Mods
+    AdminReview,
+}
 
+impl TryFrom<u64> for Visibility {
+    type Error = ApiErr;
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Visible),
+            1 => Ok(Self::Hidden),
+            2 => Ok(Self::AdminReview),
+            _ => Err(ApiErr {
+                message: Some("unknown visibility".to_string()),
+                cause: None,
+                err_type: ApiErrorType::InternalError,
+            }),
+        }
+    }
 }

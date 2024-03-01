@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
-use crate::RequestImpl;
 use crate::search::SearchResponse;
+use crate::RequestImpl;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct HomeResponse {
