@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use crate::RequestImpl;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -57,6 +57,11 @@ pub struct MangaReaderRequest {
     pub chapter_id: Option<String>,
 }
 
+impl RequestImpl for MangaReaderRequest {
+    const ROUTE: &'static str = "reader_info";
+    const AUTH: bool = true;
+}
+
 fn max_f64(items: &Vec<f64>) -> Option<f64> {
     let mut max = None;
     for item in items {
@@ -64,9 +69,35 @@ fn max_f64(items: &Vec<f64>) -> Option<f64> {
             if item > max {
                 *max = *item;
             }
-        }else {
+        } else {
             max = Some(*item)
         }
     }
     max
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ReaderPageRequest {
+    pub chapter_version_id: String,
+}
+
+impl RequestImpl for ReaderPageRequest {
+    const ROUTE: &'static str = "pages";
+    const AUTH: bool = true;
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ReaderPageResponse {
+    pub version_id: String,
+    pub hide_top: f64,
+    pub hide_bottom: f64,
+    pub pages: HashMap<u32, ReaderPage>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ReaderPage {
+    pub width: u32,
+    pub height: u32,
+    pub ext: String,
+    pub translation: bool,
 }

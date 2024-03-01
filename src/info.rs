@@ -1,6 +1,6 @@
 use crate::error::ApiErr;
 use crate::search::Status;
-use crate::ApiErrorType;
+use crate::{ApiErrorType, RequestImpl};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -31,6 +31,11 @@ pub struct MangaInfoResponse {
     pub favorite: bool,
     /// manga_id
     pub progress: Option<String>,
+}
+
+impl RequestImpl for MangaInfoResponse {
+    const ROUTE: &'static str = "info";
+    const AUTH: bool = true;
 }
 
 #[derive(Serialize, Deserialize)]
