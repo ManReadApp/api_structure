@@ -16,6 +16,44 @@ pub struct MangaReaderResponse {
 }
 
 impl MangaReaderResponse {
+    pub fn get_chapter(&self, id: &str) -> Option<&ReaderChapter> {
+        for ch in &self.chapters {
+            if ch.chapter_id == id {
+                return Some(ch);
+            }
+        }
+        None
+    }
+
+    pub fn get_prev_chapter(&self, id: &str) -> Option<&ReaderChapter> {
+        let mut last = None;
+        for ch in &self.chapters {
+            if ch.chapter_id == id {
+                break;
+            }
+            last = Some(&ch.chapter_id)
+        }
+        match last {
+            None => None,
+            Some(v) => self.get_chapter(v),
+        }
+    }
+
+    pub fn get_next_chapter(&self, id: &str) -> Option<&ReaderChapter> {
+        let mut hit = false;
+        for ch in &self.chapters {
+            if hit {
+                return Some(ch);
+            }
+            if ch.chapter_id == id {
+                hit = true;
+            }
+        }
+        None
+    }
+}
+
+impl MangaReaderResponse {
     pub fn no_chapters(&self) -> bool {
         self.chapters.is_empty()
     }
@@ -94,10 +132,47 @@ pub struct ReaderPageResponse {
     pub pages: HashMap<u32, ReaderPage>,
 }
 
+pub enum Action<'a> {
+    Prev,
+    Page(&'a ReaderPage),
+    Next,
+}
+
+impl ReaderPageResponse {
+    pub fn get_page(&self, page: u32) -> Action {
+        if page < 1 {
+            Action::Prev
+        } else if let Some(v) = self.pages.get(&page) {
+            Action::Page(v)
+        } else {
+            Action::Next
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct ReaderPage {
+    pub page_id: String,
     pub width: u32,
     pub height: u32,
     pub ext: String,
     pub translation: bool,
+    pub progress: Progress,
+}
+
+impl ReaderPage {
+    pub fn width(&self, available_height: f32) -> f32 {
+        (available_height / self.height as f32) * self.width as f32
+    }
+    pub fn height(&self, available_width: f32) -> f32 {
+        (available_width / self.width as f32) * self.height as f32
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Progress {
+    pub width_start: f64,
+    pub width_end: f64,
+    pub height_start: f64,
+    pub height_end: f64,
 }

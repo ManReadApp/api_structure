@@ -33,7 +33,7 @@ pub struct MangaInfoResponse {
     pub progress: Option<String>,
 }
 
-impl RequestImpl for MangaInfoResponse {
+impl RequestImpl for MangaInfoRequest {
     const ROUTE: &'static str = "info";
     const AUTH: bool = true;
 }
