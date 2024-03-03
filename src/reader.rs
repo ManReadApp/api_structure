@@ -150,7 +150,7 @@ impl ReaderPageResponse {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ReaderPage {
     pub page_id: String,
     pub width: u32,
@@ -161,6 +161,21 @@ pub struct ReaderPage {
 }
 
 impl ReaderPage {
+    pub fn new(w: u32, h: u32) -> Self {
+        Self {
+            page_id: "".to_string(),
+            width: w,
+            height: h,
+            ext: "gif".to_string(),
+            translation: false,
+            progress: Progress {
+                width_start: 0.0,
+                width_end: 0.0,
+                height_start: 0.0,
+                height_end: 0.0,
+            },
+        }
+    }
     pub fn width(&self, available_height: f32) -> f32 {
         (available_height / self.height as f32) * self.width as f32
     }
@@ -169,10 +184,22 @@ impl ReaderPage {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Progress {
     pub width_start: f64,
     pub width_end: f64,
     pub height_start: f64,
     pub height_end: f64,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct TranslationArea {
+    pub translated_text: HashMap<String, String>,
+    pub min_x: u32,
+    pub min_y: u32,
+    pub max_x: u32,
+    pub max_y: u32,
+    pub text_color: [u8; 3],
+    pub outline_color: [u8; 3],
+    pub background: String,
 }
