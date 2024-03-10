@@ -92,7 +92,7 @@ impl From<Status> for u64 {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 pub struct SearchRequest {
     pub order: Order,
     pub desc: bool,
@@ -117,7 +117,7 @@ pub enum Order {
 }
 
 /// can contain item or array
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum ItemOrArray {
     Item(Item),
@@ -126,15 +126,19 @@ pub enum ItemOrArray {
 
 impl Display for ItemOrArray {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            ItemOrArray::Item(v) => v.to_string(),
-            ItemOrArray::Array(v) => v.to_string(),
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                ItemOrArray::Item(v) => v.to_string(),
+                ItemOrArray::Array(v) => v.to_string(),
+            }
+        )
     }
 }
 
 /// array joined with and or or
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Array {
     pub or: bool,
     pub items: Vec<ItemOrArray>,
@@ -144,14 +148,25 @@ impl Display for Array {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let prefix = match self.or {
             true => "or:(",
-            false => "and:("
+            false => "and:(",
         };
-        write!(f, format!("{prefix}{})", self.items.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" ")))
+        write!(
+            f,
+            "{}",
+            format!(
+                "{prefix}{})",
+                self.items
+                    .iter()
+                    .map(|v| v.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            )
+        )
     }
 }
 
 /// item include or exclude
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Item {
     pub not: bool,
     pub data: ItemData,
@@ -159,10 +174,19 @@ pub struct Item {
 
 impl Display for Item {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, format!("{}:{}{}", self.data.name, match self.not {
-            true => "!",
-            false => ""
-        }, self.data.value))
+        write!(
+            f,
+            "{}",
+            format!(
+                "{}:{}{}",
+                self.data.name,
+                match self.not {
+                    true => "!",
+                    false => "",
+                },
+                self.data.value
+            )
+        )
     }
 }
 
@@ -177,7 +201,7 @@ impl Item {
 }
 
 /// field and value
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct ItemData {
     pub name: String,
     pub value: ItemValue,
@@ -211,19 +235,11 @@ impl ItemKind {
             ItemKind::String => ItemValue::String(s.to_string()),
             ItemKind::CmpFloat => {
                 let (bigger, eq, value) = parse(s)?;
-                ItemValue::CmpFloat {
-                    eq,
-                    bigger,
-                    value,
-                }
+                ItemValue::CmpFloat { eq, bigger, value }
             }
             ItemKind::CmpInt => {
                 let (bigger, eq, value) = parse(s)?;
-                ItemValue::CmpInt {
-                    eq,
-                    bigger,
-                    value,
-                }
+                ItemValue::CmpInt { eq, bigger, value }
             }
         })
     }
@@ -241,33 +257,106 @@ pub enum ItemValue {
     CmpInt { eq: bool, bigger: bool, value: i64 },
 }
 
+/// mostly auto generated
+impl PartialEq for ItemValue {
+    #[inline]
+    fn eq(&self, other: &ItemValue) -> bool {
+        let self_tag = core::mem::discriminant(self);
+        let other_tag = core::mem::discriminant(other);
+        self_tag == other_tag
+            && match (self, other) {
+                (ItemValue::Bool(self_value), ItemValue::Bool(other_value)) => {
+                    *self_value == *other_value
+                }
+                (ItemValue::Int(self_value), ItemValue::Int(other_value)) => {
+                    *self_value == *other_value
+                }
+                (ItemValue::Float(self_value), ItemValue::Float(other_value)) => {
+                    format!("{:.4}", self_value) == format!("{:.4}", other_value)
+                }
+                (ItemValue::String(self_value), ItemValue::String(other_value)) => {
+                    *self_value == *other_value
+                }
+                (
+                    ItemValue::CmpInt {
+                        eq: self_eq,
+                        bigger: self_bigger,
+                        value: self_value,
+                    },
+                    ItemValue::CmpInt {
+                        eq: other_eq,
+                        bigger: other_bigger,
+                        value: other_value,
+                    },
+                ) => {
+                    *self_eq == *other_eq
+                        && *self_bigger == *other_bigger
+                        && *self_value == *other_value
+                }
+                (
+                    ItemValue::CmpFloat {
+                        eq: self_eq,
+                        bigger: self_bigger,
+                        value: self_value,
+                    },
+                    ItemValue::CmpFloat {
+                        eq: other_eq,
+                        bigger: other_bigger,
+                        value: other_value,
+                    },
+                ) => {
+                    *self_eq == *other_eq
+                        && *self_bigger == *other_bigger
+                        && format!("{:.4}", self_value) == format!("{:.4}", other_value)
+                }
+                _ => true,
+            }
+    }
+}
+
+impl Eq for ItemValue {}
+
 impl Display for ItemValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            ItemValue::None => String::new(),
-            ItemValue::Bool(bool) => bool.to_string(),
-            ItemValue::Int(v) => v.to_string(),
-            ItemValue::Float(v) => v.to_string(),
-            ItemValue::String(s) => format!("\"{s}\""),
-            ItemValue::CmpFloat { eq, bigger, value } => {
-                format!("{}{}{}", match bigger {
-                    true => ">",
-                    false => "<"
-                }, match eq {
-                    true => "=",
-                    false => ""
-                }, value)
+        write!(
+            f,
+            "{}",
+            match self {
+                ItemValue::None => String::new(),
+                ItemValue::Bool(bool) => bool.to_string(),
+                ItemValue::Int(v) => v.to_string(),
+                ItemValue::Float(v) => v.to_string(),
+                ItemValue::String(s) => format!("\"{s}\""),
+                ItemValue::CmpFloat { eq, bigger, value } => {
+                    format!(
+                        "{}{}{}",
+                        match bigger {
+                            true => ">",
+                            false => "<",
+                        },
+                        match eq {
+                            true => "=",
+                            false => "",
+                        },
+                        value
+                    )
+                }
+                ItemValue::CmpInt { eq, bigger, value } => {
+                    format!(
+                        "{}{}{}",
+                        match bigger {
+                            true => ">",
+                            false => "<",
+                        },
+                        match eq {
+                            true => "=",
+                            false => "",
+                        },
+                        value
+                    )
+                }
             }
-            ItemValue::CmpInt { eq, bigger, value } => {
-                format!("{}{}{}", match bigger {
-                    true => ">",
-                    false => "<"
-                }, match eq {
-                    true => "=",
-                    false => ""
-                }, value)
-            }
-        })
+        )
     }
 }
 
