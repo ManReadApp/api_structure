@@ -68,13 +68,14 @@ impl RequestImpl for SearchRequest {
     const AUTH: bool = true;
 }
 
-#[derive(Deserialize, Serialize, Debug, Copy, Clone)]
+#[derive(Deserialize, Serialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Order {
-    Id,
+    Created,
     Alphabetical,
     Updated,
     LastRead,
     Popularity,
+    Random,
 }
 
 /// can contain item or array
@@ -97,6 +98,16 @@ pub struct Array {
 pub struct Item {
     pub not: bool,
     pub data: ItemData,
+}
+
+impl Item {
+    pub fn new(data: ItemData) -> Self {
+        Self { not: false, data }
+    }
+
+    pub fn new_exclude(data: ItemData) -> Self {
+        Self { not: true, data }
+    }
 }
 
 /// field and value

@@ -1,6 +1,6 @@
 pub enum ExternalSearchRequest {
     Simple(SimpleSearch),
-    String((String, u32))
+    String((String, u32)),
 }
 
 pub struct ValidSearch {

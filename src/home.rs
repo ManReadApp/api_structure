@@ -9,6 +9,7 @@ pub struct HomeResponse {
     pub latest_updates: Vec<SearchResponse>,
     pub favorites: Vec<SearchResponse>,
     pub reading: Vec<SearchResponse>,
+    pub random: Vec<SearchResponse>,
 }
 
 impl RequestImpl for HomeResponse {
