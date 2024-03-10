@@ -1,9 +1,19 @@
 use crate::error::ApiErr;
 use crate::ApiErrorType;
 use crate::RequestImpl;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::str::FromStr;
+
+pub trait DisplaySearch: DeserializeOwned {
+    fn image_number(&self) -> u32;
+    fn internal(&self) -> bool;
+    fn id_url(&self) -> &String;
+    fn ext(&self) -> &String;
+    fn status(&self) -> &Status;
+    fn titles(&self) -> &HashMap<String, Vec<String>>;
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct SearchResponse {
@@ -14,6 +24,33 @@ pub struct SearchResponse {
     pub ext: String,
     pub number: u32,
 }
+
+impl DisplaySearch for SearchResponse {
+    fn image_number(&self) -> u32 {
+        self.number
+    }
+
+    fn internal(&self) -> bool {
+        true
+    }
+
+    fn id_url(&self) -> &String {
+        &self.manga_id
+    }
+
+    fn ext(&self) -> &String {
+        &self.ext
+    }
+
+    fn status(&self) -> &Status {
+        &self.status
+    }
+
+    fn titles(&self) -> &HashMap<String, Vec<String>> {
+        &self.titles
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, Copy)]
 pub enum Status {
     Dropped,
