@@ -4,6 +4,7 @@ use crate::RequestImpl;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 pub trait DisplaySearch: DeserializeOwned {
@@ -123,6 +124,15 @@ pub enum ItemOrArray {
     Array(Array),
 }
 
+impl Display for ItemOrArray {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            ItemOrArray::Item(v) => v.to_string(),
+            ItemOrArray::Array(v) => v.to_string(),
+        })
+    }
+}
+
 /// array joined with and or or
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Array {
@@ -130,11 +140,30 @@ pub struct Array {
     pub items: Vec<ItemOrArray>,
 }
 
+impl Display for Array {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let prefix = match self.or {
+            true => "or:(",
+            false => "and:("
+        };
+        write!(f, format!("{prefix}{})", self.items.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" ")))
+    }
+}
+
 /// item include or exclude
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Item {
     pub not: bool,
     pub data: ItemData,
+}
+
+impl Display for Item {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, format!("{}:{}{}", self.data.name, match self.not {
+            true => "!",
+            false => ""
+        }, self.data.value))
+    }
 }
 
 impl Item {
@@ -181,19 +210,19 @@ impl ItemKind {
             ItemKind::Float => ItemValue::Float(s.parse().map_err(|_| "")?),
             ItemKind::String => ItemValue::String(s.to_string()),
             ItemKind::CmpFloat => {
-                let (a, b, c) = parse(s)?;
+                let (bigger, eq, value) = parse(s)?;
                 ItemValue::CmpFloat {
-                    eq: a,
-                    bigger: b,
-                    value: c,
+                    eq,
+                    bigger,
+                    value,
                 }
             }
             ItemKind::CmpInt => {
-                let (a, b, c) = parse(s)?;
+                let (bigger, eq, value) = parse(s)?;
                 ItemValue::CmpInt {
-                    eq: a,
-                    bigger: b,
-                    value: c,
+                    eq,
+                    bigger,
+                    value,
                 }
             }
         })
@@ -212,10 +241,46 @@ pub enum ItemValue {
     CmpInt { eq: bool, bigger: bool, value: i64 },
 }
 
+impl Display for ItemValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            ItemValue::None => String::new(),
+            ItemValue::Bool(bool) => bool.to_string(),
+            ItemValue::Int(v) => v.to_string(),
+            ItemValue::Float(v) => v.to_string(),
+            ItemValue::String(s) => format!("\"{s}\""),
+            ItemValue::CmpFloat { eq, bigger, value } => {
+                format!("{}{}{}", match bigger {
+                    true => ">",
+                    false => "<"
+                }, match eq {
+                    true => "=",
+                    false => ""
+                }, value)
+            }
+            ItemValue::CmpInt { eq, bigger, value } => {
+                format!("{}{}{}", match bigger {
+                    true => ">",
+                    false => "<"
+                }, match eq {
+                    true => "=",
+                    false => ""
+                }, value)
+            }
+        })
+    }
+}
+
 pub struct Field {
     pub name: String,
     pub abbr: Vec<String>,
     pub kind: ItemKind,
+}
+
+impl Field {
+    pub fn new(name: String, abbr: Vec<String>, kind: ItemKind) -> Self {
+        Self { name, abbr, kind }
+    }
 }
 
 fn parse<T: FromStr>(s: &str) -> Result<(bool, bool, T), String> {
@@ -232,8 +297,8 @@ fn parse<T: FromStr>(s: &str) -> Result<(bool, bool, T), String> {
         (false, str)
     };
     Ok((
-        eq,
         b == s || b,
+        eq,
         num.parse::<T>()
             .map_err(|_| format!("Failed to parse: {}", num))?,
     ))
