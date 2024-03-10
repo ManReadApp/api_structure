@@ -1,8 +1,29 @@
-pub enum ExternalSearchRequest {
+use crate::RequestImpl;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+pub struct ExternalSearchRequest {
+    pub data: ExternalSearchData,
+    pub uri: String,
+}
+#[derive(Serialize, Deserialize)]
+pub enum ExternalSearchData {
     Simple(SimpleSearch),
     String((String, u32)),
 }
 
+impl RequestImpl for ExternalSearchRequest {
+    const ROUTE: &'static str = "external/search";
+    const AUTH: bool = true;
+}
+#[derive(Serialize, Deserialize)]
+pub struct ScrapeSearchResult {
+    pub title: String,
+    pub url: String,
+    pub cover: String,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct ValidSearch {
     pub sorts: Vec<String>,
     pub tags: Vec<String>,
@@ -31,6 +52,7 @@ impl ValidSearch {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct SimpleSearch {
     pub search: Option<String>,
     pub sort: Option<String>,

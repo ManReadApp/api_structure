@@ -17,12 +17,7 @@ pub struct MangaReaderResponse {
 
 impl MangaReaderResponse {
     pub fn get_chapter(&self, id: &str) -> Option<&ReaderChapter> {
-        for ch in &self.chapters {
-            if ch.chapter_id == id {
-                return Some(ch);
-            }
-        }
-        None
+        self.chapters.iter().find(|&ch| ch.chapter_id == id)
     }
 
     pub fn get_prev_chapter(&self, id: &str) -> Option<&ReaderChapter> {

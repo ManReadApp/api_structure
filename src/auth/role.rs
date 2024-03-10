@@ -34,10 +34,7 @@ impl From<u32> for Kind {
             (Role::from(d), chars.next().unwrap())
         };
 
-        let single = match single {
-            '1' => true,
-            _ => false,
-        };
+        let single = matches!(single, '1');
         Self { single, kind: role }
     }
 }
