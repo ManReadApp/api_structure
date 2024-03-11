@@ -10,7 +10,6 @@ pub mod search;
 
 use crate::error::{ApiErr, ApiErrorType};
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use url::{ParseError, Url};
 

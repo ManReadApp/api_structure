@@ -17,7 +17,7 @@ pub struct Kind {
     pub kind: Role,
 }
 impl Kind {
-    fn new(single: bool, kind: Role) -> Self {
+    pub fn new(single: bool, kind: Role) -> Self {
         Self { single, kind }
     }
 }

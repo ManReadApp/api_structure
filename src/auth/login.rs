@@ -1,4 +1,4 @@
-use crate::{Request, RequestImpl};
+use crate::RequestImpl;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
