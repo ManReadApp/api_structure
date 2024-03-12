@@ -59,3 +59,10 @@ impl Request {
         self.req_body = s.as_bytes().to_vec();
     }
 }
+
+pub struct SearchUris;
+
+impl RequestImpl for SearchUris {
+    const ROUTE: &'static str = "external/search/sites";
+    const AUTH: bool = true;
+}

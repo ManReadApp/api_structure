@@ -1,3 +1,4 @@
+use crate::error::{ApiErr, ApiErrorType};
 use crate::RequestImpl;
 use serde::{Deserialize, Serialize};
 
@@ -12,15 +13,37 @@ pub enum ExternalSearchData {
     String((String, u32)),
 }
 
+impl ExternalSearchData {
+    pub fn get_simple(self) -> Result<SimpleSearch, ApiErr> {
+        match self {
+            Self::Simple(s) => Ok(s),
+            _ => Err(ApiErr {
+                message: Some("wrong ExternalSearchData type".to_string()),
+                cause: None,
+                err_type: ApiErrorType::InvalidInput,
+            }),
+        }
+    }
+
+    pub fn get_query(self) -> (String, u32) {
+        match self {
+            Self::Simple(s) => (s.search.unwrap_or_default(), s.page),
+            Self::String(s) => s,
+        }
+    }
+}
+
 impl RequestImpl for ExternalSearchRequest {
     const ROUTE: &'static str = "external/search";
     const AUTH: bool = true;
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ScrapeSearchResult {
     pub title: String,
     pub url: String,
     pub cover: String,
+    pub r#type: Option<String>,
+    pub status: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
