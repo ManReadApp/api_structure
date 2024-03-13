@@ -3,17 +3,18 @@ use crate::ApiErrorType;
 use crate::RequestImpl;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
-pub trait DisplaySearch: DeserializeOwned {
+pub trait DisplaySearch: DeserializeOwned + Send {
     fn image_number(&self) -> u32;
     fn internal(&self) -> bool;
     fn id_url(&self) -> &String;
-    fn ext(&self) -> &String;
-    fn status(&self) -> &Status;
-    fn titles(&self) -> &HashMap<String, Vec<String>>;
+    fn ext(&self) -> Cow<String>;
+    fn status(&self) -> Cow<Status>;
+    fn titles(&self) -> Cow<HashMap<String, Vec<String>>>;
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -39,16 +40,16 @@ impl DisplaySearch for SearchResponse {
         &self.manga_id
     }
 
-    fn ext(&self) -> &String {
-        &self.ext
+    fn ext(&self) -> Cow<String> {
+        Cow::Borrowed(&self.ext)
     }
 
-    fn status(&self) -> &Status {
-        &self.status
+    fn status(&self) -> Cow<Status> {
+        Cow::Borrowed(&self.status)
     }
 
-    fn titles(&self) -> &HashMap<String, Vec<String>> {
-        &self.titles
+    fn titles(&self) -> Cow<HashMap<String, Vec<String>>> {
+        Cow::Borrowed(&self.titles)
     }
 }
 

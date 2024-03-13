@@ -1,6 +1,9 @@
 use crate::error::{ApiErr, ApiErrorType};
+use crate::search::{DisplaySearch, Status};
 use crate::RequestImpl;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct ExternalSearchRequest {
@@ -44,6 +47,34 @@ pub struct ScrapeSearchResult {
     pub cover: String,
     pub r#type: Option<String>,
     pub status: Option<String>,
+}
+
+impl DisplaySearch for ScrapeSearchResult {
+    fn image_number(&self) -> u32 {
+        0
+    }
+
+    fn internal(&self) -> bool {
+        false
+    }
+
+    fn id_url(&self) -> &String {
+        &self.url
+    }
+
+    fn ext(&self) -> Cow<String> {
+        Cow::Owned("".to_string())
+    }
+
+    fn status(&self) -> Cow<Status> {
+        Cow::Owned(Status::Ongoing)
+    }
+
+    fn titles(&self) -> Cow<HashMap<String, Vec<String>>> {
+        let mut hm = HashMap::new();
+        hm.insert("eng".to_string(), vec![self.title.clone()]);
+        Cow::Owned(hm)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
