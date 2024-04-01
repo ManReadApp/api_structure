@@ -7,6 +7,7 @@ pub mod reader;
 pub mod scrape;
 pub mod scraper;
 pub mod search;
+pub mod fonts;
 
 use crate::error::{ApiErr, ApiErrorType};
 use std::collections::HashMap;
