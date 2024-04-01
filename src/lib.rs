@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod error;
+pub mod fonts;
 pub mod home;
 pub mod image;
 pub mod info;
@@ -7,7 +8,6 @@ pub mod reader;
 pub mod scrape;
 pub mod scraper;
 pub mod search;
-pub mod fonts;
 
 use crate::error::{ApiErr, ApiErrorType};
 use std::collections::HashMap;
