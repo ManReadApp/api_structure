@@ -15,6 +15,7 @@ pub trait DisplaySearch: DeserializeOwned + Send {
     fn ext(&self) -> Cow<String>;
     fn status(&self) -> Cow<Status>;
     fn titles(&self) -> Cow<HashMap<String, Vec<String>>>;
+    fn cover(&self) -> &str;
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -50,6 +51,10 @@ impl DisplaySearch for SearchResponse {
 
     fn titles(&self) -> Cow<HashMap<String, Vec<String>>> {
         Cow::Borrowed(&self.titles)
+    }
+
+    fn cover(&self) -> &str {
+        ""
     }
 }
 

@@ -1,5 +1,5 @@
 use crate::error::{ApiErr, ApiErrorType};
-use crate::search::{DisplaySearch, Status};
+use crate::search::{DisplaySearch, Field, Status};
 use crate::RequestImpl;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -10,6 +10,23 @@ pub struct ExternalSearchRequest {
     pub data: ExternalSearchData,
     pub uri: String,
 }
+
+impl ExternalSearchRequest {
+    pub fn next_page(&mut self) {
+        match &mut self.data {
+            ExternalSearchData::Simple(simple) => simple.page += 1,
+            ExternalSearchData::String((_, page)) => *page += 1,
+        }
+    }
+
+    pub fn reset_page(&mut self) {
+        match &mut self.data {
+            ExternalSearchData::Simple(simple) => simple.page = 1,
+            ExternalSearchData::String((_, page)) => *page = 1,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub enum ExternalSearchData {
     Simple(SimpleSearch),
@@ -17,6 +34,16 @@ pub enum ExternalSearchData {
 }
 
 impl ExternalSearchData {
+    pub fn update_query(&mut self, new: &str) {
+        match self {
+            Self::Simple(simple) => {
+                simple.search = new.to_string();
+            }
+            Self::String((query, _)) => {
+                *query = new.to_string();
+            }
+        }
+    }
     pub fn get_simple(self) -> Result<SimpleSearch, ApiErr> {
         match self {
             Self::Simple(s) => Ok(s),
@@ -30,7 +57,7 @@ impl ExternalSearchData {
 
     pub fn get_query(self) -> (String, u32) {
         match self {
-            Self::Simple(s) => (s.search.unwrap_or_default(), s.page),
+            Self::Simple(s) => (s.search, s.page),
             Self::String(s) => s,
         }
     }
@@ -40,6 +67,7 @@ impl RequestImpl for ExternalSearchRequest {
     const ROUTE: &'static str = "external/search";
     const AUTH: bool = true;
 }
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ScrapeSearchResult {
     pub title: String,
@@ -75,6 +103,10 @@ impl DisplaySearch for ScrapeSearchResult {
         hm.insert("eng".to_string(), vec![self.title.clone()]);
         Cow::Owned(hm)
     }
+
+    fn cover(&self) -> &str {
+        &self.cover
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -104,11 +136,24 @@ impl ValidSearch {
             ],
         }
     }
+
+    pub fn kitsu() -> Self {
+        Self {
+            sorts: vec![
+                "popularity".to_string(),
+                "rating".to_string(),
+                "updated".to_string(),
+                "created".to_string(),
+            ],
+            tags: vec![],
+            status: vec![],
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct SimpleSearch {
-    pub search: Option<String>,
+    pub search: String,
     pub sort: Option<String>,
     pub desc: bool,
     pub status: Option<String>,
@@ -135,5 +180,17 @@ impl SimpleSearch {
             }
         }
         true
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub enum ValidSearches {
+    String,
+    ValidSearch(ValidSearch),
+}
+
+impl ValidSearches {
+    pub fn parser(&self) -> Option<Vec<Field>> {
+        None
     }
 }
